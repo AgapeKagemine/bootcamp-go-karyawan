@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"karyawan/model"
 	"os"
+	"regexp"
 	"strconv"
 )
 
@@ -14,25 +15,36 @@ func main() {
 	for {
 		cls()
 		fmt.Printf("Daftar Kehadiran Karyawan: \n\n")
+
 		if len(DaftarKaryawan) > 0 {
 			model.PenampilanDaftarKaryawan(DaftarKaryawan)
 		} else {
 			fmt.Printf("Tidak ada data untuk sekarang\n")
 		}
+
 		fmt.Printf("\n[1] Tambah karyawan baru ke daftar karyawan\n")
 		fmt.Printf("[2] Ubah status karyawan\n")
 		fmt.Printf("[3] Hapus karyawan dari daftar karyawan\n")
 		fmt.Printf("[4] Keluar program\n")
 
 		menu := 0
+		err := error(nil)
+
 		fmt.Printf("\nPilih Menu: ")
 		if sc.Scan() {
-			menu, _ = strconv.Atoi(sc.Text())
+			menu, err = strconv.Atoi(sc.Text())
+		}
+
+		if err != nil {
+			cls()
+			fmt.Printf("\n\nInput tidak valid\n")
+			fmt.Scanln()
+			continue
 		}
 
 		cls()
-		if menu < 1 || menu > 5 {
-			fmt.Printf("\n\nPilihan menu diantara 1 hingga 5!")
+		if menu < 1 || menu > 4 {
+			fmt.Printf("\n\nPilihan menu diantara 1 hingga 4!")
 			fmt.Scanln()
 			continue
 		}
@@ -59,12 +71,16 @@ func main() {
 func menu_tambah(list *[]model.Karyawan, sc *bufio.Scanner) {
 	nama := ""
 	for {
+		cls()
 		fmt.Printf("Masukkan Nama: ")
 		if sc.Scan() {
 			nama = sc.Text()
 		}
-		if len(nama) < 1 || nama == "" {
-			fmt.Printf("\n\nNama tidak boleh kosong\n")
+
+		if len(nama) < 1 || nama == "" || nama == "\n" || regexp.MustCompile(`\d`).MatchString(nama) {
+			cls()
+			fmt.Printf("\n\nNama tidak boleh kosong ataupun angka\n")
+			fmt.Scanln()
 			continue
 		}
 		break
@@ -94,10 +110,11 @@ func menu_update_status(list *[]model.Karyawan, sc *bufio.Scanner) {
 		fmt.Printf("\n\nTidak ada data untuk diubah\n")
 		return
 	}
+
 	menu := 0
 	for {
 		cls()
-		var err error
+		err := error(nil)
 		model.PenampilanDaftarKaryawan(*list)
 		fmt.Printf("\nPilih Id Karyawan: ")
 		if sc.Scan() {
@@ -109,21 +126,34 @@ func menu_update_status(list *[]model.Karyawan, sc *bufio.Scanner) {
 				continue
 			}
 		}
-		if menu > len(*list) {
+
+		flag := false
+		for idx, karyawan := range *list {
+			if karyawan.Id == int64(menu) {
+				break
+			}
+			if idx == len(*list)-1 {
+				flag = true
+			}
+		}
+
+		if flag {
 			cls()
-			fmt.Printf("\n\nIndex tidak di temukan %d!\n", menu)
+			fmt.Printf("\n\"ID tidak di temukan %d!\n", menu)
 			fmt.Scanln()
 			continue
 		}
 		break
 	}
+
 	status := ""
 	for {
 		cls()
-		fmt.Printf("\nPerubahan status karyawan(hadir/tidak): ")
+		fmt.Printf("\nPerubahan status karyawan(hadir|tidak): ")
 		if sc.Scan() {
 			status = sc.Text()
 		}
+
 		if status != "hadir" && status != "tidak" {
 			cls()
 			fmt.Printf("\n\nStatus karyawan tidak valid\n")
@@ -132,6 +162,7 @@ func menu_update_status(list *[]model.Karyawan, sc *bufio.Scanner) {
 		}
 		break
 	}
+
 	cls()
 	for idx, karyawan := range *list {
 		if karyawan.Id == int64(menu) {
@@ -143,6 +174,7 @@ func menu_update_status(list *[]model.Karyawan, sc *bufio.Scanner) {
 			break
 		}
 	}
+
 	fmt.Println("\n\nDaftar karyawan berhasil diubah")
 }
 
@@ -151,10 +183,11 @@ func menu_hapus(list *[]model.Karyawan, sc *bufio.Scanner) {
 		fmt.Printf("\n\nTidak ada data untuk dihapus\n")
 		return
 	}
+
 	menu := 0
 	for {
 		cls()
-		var err error
+		err := error(nil)
 		model.PenampilanDaftarKaryawan(*list)
 		fmt.Printf("\nPilih Id Karyawan: ")
 		if sc.Scan() {
@@ -166,22 +199,27 @@ func menu_hapus(list *[]model.Karyawan, sc *bufio.Scanner) {
 				continue
 			}
 		}
-		if menu > len(*list) {
+
+		flag := false
+		for idx, karyawan := range *list {
+			if karyawan.Id == int64(menu) {
+				*list = append((*list)[:idx], (*list)[idx+1:]...)
+				break
+			}
+			if idx == len(*list)-1 {
+				flag = true
+			}
+		}
+
+		if flag {
 			cls()
-			fmt.Printf("\n\nIndex tidak di temukan %d!\n", menu)
+			fmt.Printf("\n\"ID tidak di temukan %d!\n", menu)
 			fmt.Scanln()
 			continue
 		}
-		for idx, karyawan := range *list {
-			if karyawan.Id == int64(menu) {
-				*list = append((*list)[:menu-1], (*list)[menu:]...)
-				for i := idx; i < len(*list); i++ {
-					(*list)[i].Id = (*list)[i].Id - 1
-				}
-			}
-		}
 		break
 	}
+
 	cls()
 	fmt.Println("Daftar karyawan berhasil dihapus")
 }
