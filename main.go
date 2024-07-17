@@ -3,10 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"karyawan/model"
 	"os"
 	"regexp"
 	"strconv"
+
+	"karyawan/model"
 )
 
 func main() {
@@ -31,6 +32,7 @@ func main() {
 		err := error(nil)
 
 		fmt.Printf("\nPilih Menu: ")
+
 		if sc.Scan() {
 			menu, err = strconv.Atoi(sc.Text())
 		}
@@ -73,6 +75,7 @@ func menu_tambah(list *[]model.Karyawan, sc *bufio.Scanner) {
 	for {
 		cls()
 		fmt.Printf("Masukkan Nama: ")
+
 		if sc.Scan() {
 			nama = sc.Text()
 		}
@@ -112,11 +115,13 @@ func menu_update_status(list *[]model.Karyawan, sc *bufio.Scanner) {
 	}
 
 	menu := 0
+
 	for {
 		cls()
-		err := error(nil)
 		model.PenampilanDaftarKaryawan(*list)
 		fmt.Printf("\nPilih Id Karyawan: ")
+
+		err := error(nil)
 		if sc.Scan() {
 			menu, err = strconv.Atoi(sc.Text())
 			if err != nil {
@@ -128,10 +133,12 @@ func menu_update_status(list *[]model.Karyawan, sc *bufio.Scanner) {
 		}
 
 		flag := false
+
 		for idx, karyawan := range *list {
 			if karyawan.Id == int64(menu) {
 				break
 			}
+
 			if idx == len(*list)-1 {
 				flag = true
 			}
@@ -185,11 +192,13 @@ func menu_hapus(list *[]model.Karyawan, sc *bufio.Scanner) {
 	}
 
 	menu := 0
+
 	for {
 		cls()
 		err := error(nil)
 		model.PenampilanDaftarKaryawan(*list)
 		fmt.Printf("\nPilih Id Karyawan: ")
+
 		if sc.Scan() {
 			menu, err = strconv.Atoi(sc.Text())
 			if err != nil {
@@ -201,11 +210,13 @@ func menu_hapus(list *[]model.Karyawan, sc *bufio.Scanner) {
 		}
 
 		flag := false
+
 		for idx, karyawan := range *list {
 			if karyawan.Id == int64(menu) {
 				*list = append((*list)[:idx], (*list)[idx+1:]...)
 				break
 			}
+
 			if idx == len(*list)-1 {
 				flag = true
 			}
